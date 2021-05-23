@@ -2,12 +2,13 @@
 name = "ronvoy"
 version = "0.1.0"
 authors = ["Bobby Powers <bobbypowers@gmail.com>"]
+license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-rustls = "0.18"
-tokio-rustls = "0.14"
-futures-util = "0.3"
-tokio = { version = "0.2", features = [ "net", "io-std", "io-util", "rt-threaded" ] }
-structopt = "0.3"
-webpki-roots = "0.20"
+rustls = "0.19"
+async-rustls = "0.2"
+webpki-roots = "0.21"
+pico-args = "0.4"
+ring = { version = "0.16", features=["std"] }
+async-executor = "1"
