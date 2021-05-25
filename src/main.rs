@@ -3,10 +3,14 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::net::ToSocketAddrs;
+use std::thread;
 use std::io::BufReader;
 use async_executor::Executor;
+use async_io::block_on;
 use async_rustls::{ TlsConnector, rustls::ClientConfig, webpki::DNSNameRef };
+use futures_lite::future;
 
+#[derive(PartialEq, Eq, Clone, Default, Debug)]
 struct Options {
     host: String,
     port: u16,
@@ -18,24 +22,57 @@ struct Options {
 struct GlobalRonvoy<'a> {
     // TLS handshakes are expensive - segregate them from proxying
     // data back and forth on established connections
-    handshake_executor: Executor<'a>,
+    handshake_executor: Arc<Executor<'a>>,
     // once a connection is established it goes here
-    established_executor: Executor<'a>,
+    proxy_executor: Arc<Executor<'a>>,
 
 }
 
-fn main() -> io::Result<()> {
-    let options = Options::from_args();
+fn main() {
+    let options = Options{
+        host: "127.0.0.1".to_string(),
+        port: 1337,
+        domain: None,
+        ca_file: None
+    };
 
     let addr = (options.host.as_str(), options.port)
-        .to_socket_addrs()?
+        .to_socket_addrs().unwrap()
         .next()
-        .ok_or_else(|| io::Error::from(io::ErrorKind::NotFound))?;
+        .ok_or_else(|| io::Error::from(io::ErrorKind::NotFound)).unwrap();
     let domain = options.domain.unwrap_or(options.host);
     let content = format!(
         "GET / HTTP/1.0\r\nHost: {}\r\n\r\n",
         domain
     );
+
+    let global_ronvoy = GlobalRonvoy {
+        handshake_executor: Arc::new(Executor::new()),
+        proxy_executor:  Arc::new(Executor::new()),
+    };
+
+    let num_threads = {
+        // Parse SMOL_THREADS or default to 1.
+        std::env::var("RONVOY_THREADS")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(4)
+    };
+
+    for n in 1..=num_threads {
+        let handshake_executor = global_ronvoy.handshake_executor.clone();
+        let proxy_executor = global_ronvoy.proxy_executor.clone();
+        thread::Builder::new()
+            .name(format!("handshake-{}", n))
+            .spawn(move || {
+                let handshake = &handshake_executor;
+                loop {
+                    block_on(handshake.run(future::pending::<()>()));
+                }
+            })
+            .expect("cannot spawn executor thread");
+    }
+
 
     // let mut runtime = runtime::Builder::new()
     //     .basic_scheduler()

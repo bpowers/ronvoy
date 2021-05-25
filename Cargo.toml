@@ -12,3 +12,5 @@ webpki-roots = "0.21"
 pico-args = "0.4"
 ring = { version = "0.16", features=["std"] }
 async-executor = "1"
+async-io = "1"
+futures-lite = "1"
