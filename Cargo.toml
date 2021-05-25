@@ -13,4 +13,10 @@ async-rustls = "0.2"
 futures-lite = "1"
 pico-args = "0.4"
 ring = { version = "0.16", features=["std"] }
-webpki-roots = "0.21"
+mimalloc = { version = "*", default-features = false }
+
+[profile.release]
+opt-level = 3
+lto = true
+debug = 0
+panic = "abort"

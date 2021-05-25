@@ -2,6 +2,11 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 use std::fs::File;
 use std::io::{self, BufReader};
 use std::net::ToSocketAddrs;
@@ -12,6 +17,7 @@ use std::thread;
 use async_executor::Executor;
 use async_io::block_on;
 use async_net::TcpListener;
+use async_rustls::rustls::internal::msgs::enums::ProtocolVersion;
 use async_rustls::rustls::internal::pemfile::{certs, pkcs8_private_keys};
 use async_rustls::rustls::{Certificate, NoClientAuth, PrivateKey, ServerConfig};
 use async_rustls::TlsAcceptor;
@@ -45,7 +51,6 @@ fn usage() -> ! {
             "    -h, --help       show this message\n",
             "    --addr           address to listen on (defaults to 127.0.0.1)\n",
             "    --port           port to listen on (defaults to 9301)\n",
-            "    --ca_file FILE   Certificate Authority file (defaults to webpki_roots)\n",
             "    --cert FILE      server certificate to use\n",
             "    --key FILE       server private key to use\n",
         ),
@@ -58,7 +63,6 @@ fn usage() -> ! {
 struct Args {
     addr: String,
     port: u16,
-    ca_file: Option<PathBuf>,
     cert: PathBuf,
     key: PathBuf,
 }
@@ -72,7 +76,6 @@ fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
     let mut args = Args {
         addr: "127.0.0.1".to_owned(),
         port: 9301,
-        ca_file: None,
         cert: "".to_owned().into(),
         key: "".to_owned().into(),
     };
@@ -82,7 +85,6 @@ fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
     if let Ok(port) = parsed.value_from_str::<&str, String>("--port") {
         args.port = port.parse::<u16>().unwrap();
     }
-    args.ca_file = parsed.value_from_str("--ca_file").ok();
     args.cert = parsed.value_from_str("--cert").unwrap();
     args.key = parsed.value_from_str("--key").unwrap();
 
@@ -163,7 +165,10 @@ fn main() {
     let mut config = ServerConfig::new(NoClientAuth::new());
     config
         .set_single_cert(certs, keys.remove(0))
-        .map_err(|err| io::Error::new(io::ErrorKind::InvalidInput, err)).unwrap();
+        .map_err(|err| io::Error::new(io::ErrorKind::InvalidInput, err))
+        .unwrap();
+    config.versions = vec![ProtocolVersion::TLSv1_3];
+    config.set_protocols(&["h2".as_bytes().to_vec(), "http/1.1".as_bytes().to_vec()]);
 
     let addr = (args.addr.as_str(), args.port)
         .to_socket_addrs()
