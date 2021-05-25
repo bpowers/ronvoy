@@ -13,5 +13,4 @@ async-rustls = "0.2"
 futures-lite = "1"
 pico-args = "0.4"
 ring = { version = "0.16", features=["std"] }
-rustls = "0.19"
 webpki-roots = "0.21"

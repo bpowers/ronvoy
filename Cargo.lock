@@ -301,7 +301,6 @@ dependencies = [
  "futures-lite",
  "pico-args",
  "ring",
- "rustls",
  "webpki-roots",
 ]
 
