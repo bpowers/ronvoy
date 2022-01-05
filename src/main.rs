@@ -168,7 +168,7 @@ fn main() {
         .map_err(|err| io::Error::new(io::ErrorKind::InvalidInput, err))
         .unwrap();
     config.versions = vec![ProtocolVersion::TLSv1_3];
-    config.set_protocols(&["h2".as_bytes().to_vec(), "http/1.1".as_bytes().to_vec()]);
+    config.set_protocols(&["h2".into(), "http/1.1".into()]);
 
     let addr = (args.addr.as_str(), args.port)
         .to_socket_addrs()
