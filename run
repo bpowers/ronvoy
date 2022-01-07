@@ -1,5 +1,0 @@
-#!/bin/bash
-set -euxo pipefail
-
-cargo build
-RUST_BACKTRACE=1 ./target/debug/ronvoy --cert ./server.pem --key ./server-key.pem

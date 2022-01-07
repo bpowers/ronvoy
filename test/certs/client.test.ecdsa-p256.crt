@@ -1,0 +1,56 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            4e:d5:53:b8:99:29:a8:4c:a5:23:16:40:dd:f7:1a:f6:4a:33:6d:63
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C=US, ST=Indiana, L=Pawnee, O=Very Good Building Company, LLC, CN=ca.verygoodbuildingcompany.llc
+        Validity
+            Not Before: Jan 18 20:50:03 2022 GMT
+            Not After : Jan 18 20:50:03 2023 GMT
+        Subject: O=Very Good Building Company, LLC, CN=client.test
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+                pub:
+                    04:3b:a5:39:d0:c6:0f:4c:6b:cb:f0:9d:6b:51:82:
+                    de:08:37:8c:e3:bf:91:b4:18:45:07:20:4b:a2:1b:
+                    1a:f3:19:19:76:66:81:b3:d0:fe:c3:e0:22:96:84:
+                    41:ef:af:92:9c:58:f1:cb:e7:f6:c9:0c:37:79:23:
+                    cc:60:e7:11:92
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Key Encipherment
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication
+            X509v3 Subject Alternative Name: 
+                DNS:client.test
+            X509v3 Subject Key Identifier: 
+                FC:6C:81:F5:FA:6A:20:CC:AF:A5:A0:E8:B9:4A:17:72:6F:5D:47:08
+            X509v3 Authority Key Identifier: 
+                34:90:2A:B9:B8:74:AF:40:96:64:0C:58:C9:DA:D0:DC:A1:6A:55:01
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:21:00:84:72:71:e2:71:6f:fc:b2:17:7f:f3:89:6f:
+        17:4c:55:a8:64:ba:eb:ee:88:a6:ef:d1:59:4c:02:d4:32:40:
+        2b:02:20:55:24:44:3e:87:9c:0d:06:6b:0a:72:6c:f6:d9:12:
+        b8:b9:80:1e:ca:6c:f1:fe:32:dd:92:bf:84:7a:d9:72:47
+-----BEGIN CERTIFICATE-----
+MIICWTCCAf+gAwIBAgIUTtVTuJkpqEylIxZA3fca9kozbWMwCgYIKoZIzj0EAwIw
+gYMxCzAJBgNVBAYTAlVTMRAwDgYDVQQIDAdJbmRpYW5hMQ8wDQYDVQQHDAZQYXdu
+ZWUxKDAmBgNVBAoMH1ZlcnkgR29vZCBCdWlsZGluZyBDb21wYW55LCBMTEMxJzAl
+BgNVBAMMHmNhLnZlcnlnb29kYnVpbGRpbmdjb21wYW55LmxsYzAeFw0yMjAxMTgy
+MDUwMDNaFw0yMzAxMTgyMDUwMDNaMEAxKDAmBgNVBAoMH1ZlcnkgR29vZCBCdWls
+ZGluZyBDb21wYW55LCBMTEMxFDASBgNVBAMMC2NsaWVudC50ZXN0MFkwEwYHKoZI
+zj0CAQYIKoZIzj0DAQcDQgAEO6U50MYPTGvL8J1rUYLeCDeM47+RtBhFByBLohsa
+8xkZdmaBs9D+w+AiloRB76+SnFjxy+f2yQw3eSPMYOcRkqOBkjCBjzAJBgNVHRME
+AjAAMAsGA1UdDwQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw
+FgYDVR0RBA8wDYILY2xpZW50LnRlc3QwHQYDVR0OBBYEFPxsgfX6aiDMr6Wg6LlK
+F3JvXUcIMB8GA1UdIwQYMBaAFDSQKrm4dK9AlmQMWMna0NyhalUBMAoGCCqGSM49
+BAMCA0gAMEUCIQCEcnHicW/8shd/84lvF0xVqGS66+6Ipu/RWUwC1DJAKwIgVSRE
+PoecDQZrCnJs9tkSuLmAHsps8f4y3ZK/hHrZckc=
+-----END CERTIFICATE-----

@@ -1,0 +1,50 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            26:2c:01:2e:2b:21:21:fc:e2:f1:5d:55:c6:12:07:10:33:5b:23:eb
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C=US, ST=Indiana, L=Pawnee, O=Very Good Building Company, LLC, CN=ca.verygoodbuildingcompany.llc
+        Validity
+            Not Before: Jan 18 20:49:35 2022 GMT
+            Not After : Jan 18 20:49:35 2023 GMT
+        Subject: C=US, ST=Indiana, L=Pawnee, O=Very Good Building Company, LLC, CN=ca.verygoodbuildingcompany.llc
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+                pub:
+                    04:93:c6:48:ef:3b:76:2e:0d:7b:e3:08:db:c5:d2:
+                    76:5e:42:79:45:24:c0:41:ca:5e:5c:b4:2c:1a:40:
+                    96:79:4f:70:50:fd:c4:9c:a8:df:74:3b:cd:be:76:
+                    a4:06:7c:b0:9b:d2:d8:ab:84:39:10:5d:41:1e:2c:
+                    71:0b:34:dc:0c
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                34:90:2A:B9:B8:74:AF:40:96:64:0C:58:C9:DA:D0:DC:A1:6A:55:01
+            X509v3 Authority Key Identifier: 
+                34:90:2A:B9:B8:74:AF:40:96:64:0C:58:C9:DA:D0:DC:A1:6A:55:01
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:20:47:55:1a:70:d6:b0:3f:40:44:ad:e4:69:bc:51:
+        10:40:e5:3b:3d:4a:f5:7c:42:31:f9:48:9a:09:9e:00:96:79:
+        02:21:00:cf:24:40:6e:2a:2d:5b:06:7c:23:0e:20:93:43:11:
+        87:f8:bf:83:4a:70:9e:ef:10:b9:7b:df:f3:b7:28:6e:77
+-----BEGIN CERTIFICATE-----
+MIICXTCCAgOgAwIBAgIUJiwBLishIfzi8V1VxhIHEDNbI+swCgYIKoZIzj0EAwIw
+gYMxCzAJBgNVBAYTAlVTMRAwDgYDVQQIDAdJbmRpYW5hMQ8wDQYDVQQHDAZQYXdu
+ZWUxKDAmBgNVBAoMH1ZlcnkgR29vZCBCdWlsZGluZyBDb21wYW55LCBMTEMxJzAl
+BgNVBAMMHmNhLnZlcnlnb29kYnVpbGRpbmdjb21wYW55LmxsYzAeFw0yMjAxMTgy
+MDQ5MzVaFw0yMzAxMTgyMDQ5MzVaMIGDMQswCQYDVQQGEwJVUzEQMA4GA1UECAwH
+SW5kaWFuYTEPMA0GA1UEBwwGUGF3bmVlMSgwJgYDVQQKDB9WZXJ5IEdvb2QgQnVp
+bGRpbmcgQ29tcGFueSwgTExDMScwJQYDVQQDDB5jYS52ZXJ5Z29vZGJ1aWxkaW5n
+Y29tcGFueS5sbGMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASTxkjvO3YuDXvj
+CNvF0nZeQnlFJMBByl5ctCwaQJZ5T3BQ/cScqN90O82+dqQGfLCb0tirhDkQXUEe
+LHELNNwMo1MwUTAdBgNVHQ4EFgQUNJAqubh0r0CWZAxYydrQ3KFqVQEwHwYDVR0j
+BBgwFoAUNJAqubh0r0CWZAxYydrQ3KFqVQEwDwYDVR0TAQH/BAUwAwEB/zAKBggq
+hkjOPQQDAgNIADBFAiBHVRpw1rA/QESt5Gm8URBA5Ts9SvV8QjH5SJoJngCWeQIh
+AM8kQG4qLVsGfCMOIJNDEYf4v4NKcJ7vELl73/O3KG53
+-----END CERTIFICATE-----

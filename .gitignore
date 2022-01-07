@@ -1,2 +1,6 @@
 /target
 /.idea
+/go/.idea
+/go/cmd/test-xds-srv/test-xds-srv
+/test/certs/*.old
+/test/certs/*.pem

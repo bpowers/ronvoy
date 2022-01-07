@@ -3,20 +3,36 @@ name = "ronvoy"
 version = "0.1.0"
 authors = ["Bobby Powers <bobbypowers@gmail.com>"]
 license = "Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-async-executor = "1"
-async-io = { version = "1.5.0", git="https://github.com/bpowers/async-io/" , rev="7d1b1e00b474c8716cf795f6625dfde313244b11", features=[] }
-async-net = "1"
-async-rustls = "0.2"
-futures-lite = "1"
+anyhow = "1"
+arc-swap = "1"
+axum = { version = "0.4", features = [ "http2" ] }
+envoy-control-plane = "0.4"
+futures = "0.3"
+glob = "0.3"
+hyper = "0.14"
+hyper-rustls = { version = "0.23", default-features = false, features = ["webpki-tokio", "http1", "http2", "tls12", "logging"] }
+mimalloc = "0.1"
 pico-args = "0.4"
-ring = { version = "0.16", features=["std"] }
-# mimalloc = { version = "*", default-features = false }
+serde_json = "1"
+serde_yaml = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "fs"] }
+tonic = "0.6"
+tower = "0.4"
+uuid = { version = "0.8", default-features = false, features = ["v4"] }
+
+[build-dependencies]
+built = "0.5"
+
+[dev-dependencies]
+reqwest = "0.11"
 
 [profile.release]
-opt-level = 3
-lto = false
+opt-level = "z"
+lto = true
+# codegen-units = 1
 debug = 0
 panic = "abort"
+# strip = true

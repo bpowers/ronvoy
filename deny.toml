@@ -3,7 +3,11 @@ vulnerability = "deny"
 unmaintained = "deny"
 yanked = "deny"
 notice = "deny"
-ignore = []
+ignore = [
+    "RUSTSEC-2020-0159",
+    "RUSTSEC-2020-0071",
+    "RUSTSEC-2021-0095", # FIXME: this actually sounds annoying/scary
+]
 
 [licenses]
 unlicensed = "deny"
@@ -35,6 +39,14 @@ license-files = [
     { path = "LICENSE", hash = 0x001c7e6c },
 ]
 
+[[licenses.clarify]]
+name = "encoding_rs"
+version = "*"
+expression = "(Apache-2.0 OR MIT) AND BSD-3-Clause"
+license-files = [
+    { path = "COPYRIGHT", hash = 0x39f8ad31 }
+]
+
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
@@ -43,3 +55,11 @@ highlight = "all"
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
+allow-git = [
+    # "https://github.com/bpowers/pbjson",
+    # "https://github.com/bpowers/rust-envoy-control-plane",
+]
+
+[[bans.skip]]
+name = "itoa"
+version = "=0.4.8"
