@@ -89,7 +89,6 @@ impl tower::Service<axum::http::Request<axum::body::Body>> for Cluster {
         let endpoints = self.endpoints.clone();
         let client = self.client.clone();
         Box::pin(async move {
-            println!("Handling a request for {}", req.uri());
             let off = off.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
             let Address::Socket(endpoint) = &endpoints[off % endpoints.len()];
 
