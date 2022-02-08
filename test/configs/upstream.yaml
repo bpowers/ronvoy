@@ -4,26 +4,11 @@ admin:
     socketAddress:
       address: "127.0.0.1"
       portValue: 9901
+
 node:
   id: envoy-test-1
   cluster: envoy-test-cluster-1
-#dynamicResources:
-#  ldsConfig:
-#    resourceApiVersion: V3
-#    apiConfigSource:
-#      apiType: GRPC
-#      transportApiVersion: V3
-#      grpcServices:
-#      - envoyGrpc:
-#          clusterName: xds_cluster
-#  cdsConfig:
-#    resourceApiVersion: V3
-#    apiConfigSource:
-#      apiType: GRPC
-#      transportApiVersion: V3
-#      grpcServices:
-#      - envoyGrpc:
-#          clusterName: xds_cluster
+
 staticResources:
   listeners:
     - name: server-1
@@ -33,22 +18,22 @@ staticResources:
           portValue: 9000
       filterChains:
         - filters:
-          - name: envoy.filters.network.http_connection_manager
-            typedConfig:
-              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-              statPrefix: ingress_http
-              httpFilters:
-                - name: envoy.filters.http.router
-              routeConfig:
-                name: local_route
-                virtualHosts:
-                  - name: local_service
-                    domains: ["*"]
-                    routes:
-                      - match:
-                          prefix: "/"
-                        route:
-                          cluster: local-srv
+            - name: envoy.filters.network.http_connection_manager
+              typedConfig:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                statPrefix: ingress_http
+                httpFilters:
+                  - name: envoy.filters.http.router
+                routeConfig:
+                  name: local_route
+                  virtualHosts:
+                    - name: local_service
+                      domains: [ "*" ]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: local-srv
           transportSocket:
             name: envoy.transport_sockets.tls
             typedConfig:
@@ -71,6 +56,7 @@ staticResources:
                       filename: ./certs/server.test.ecdsa-p256.crt
                     privateKey:
                       filename: ./certs/server.test.ecdsa-p256.key
+
   clusters:
     - name: local-srv
       type: STATIC
@@ -79,20 +65,8 @@ staticResources:
         clusterName: local-srv
         endpoints:
           - lbEndpoints:
-            - endpoint:
-                address:
-                  socketAddress:
-                    address: "127.0.0.1"
-                    portValue: 9110
-    - name: xds_cluster
-      type: STATIC
-      lbPolicy: ROUND_ROBIN
-      loadAssignment:
-        clusterName: xds_cluster
-        endpoints:
-          - lbEndpoints:
-            - endpoint:
-                address:
-                  socketAddress:
-                    address: "127.0.0.1"
-                    portValue: 18000
+              - endpoint:
+                  address:
+                    socketAddress:
+                      address: "127.0.0.1"
+                      portValue: 9110
