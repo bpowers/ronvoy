@@ -7,41 +7,20 @@ use mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
-use std::collections::HashMap;
-use std::future;
-use std::path::PathBuf;
 use std::sync::Arc;
 
-use axum::http::Uri;
-use envoy_control_plane::envoy::config::core::v3::{
-    node::UserAgentVersionType, BuildVersion, Node,
-};
-use envoy_control_plane::envoy::r#type::v3::SemanticVersion;
-use pico_args::Arguments;
-use uuid::Uuid;
-
-use crate::cluster::Cluster;
-use crate::config::bootstrap;
-use crate::extensions::filter::network::http_connection_manager::HttpConnectionManager;
-use crate::listener::MakeHttpConnectionRouter;
-
-#[cfg(test)]
-use crate::testing::{TestHttpServer, TEST_HANDLER_RESPONSE};
-
-#[cfg(test)]
-mod testing;
-
 mod address;
+mod build_info {
+    include!(concat!(env!("OUT_DIR"), "/built.rs"));
+}
 mod cluster;
 pub mod config;
 mod extensions;
 mod listener;
 mod route;
+#[cfg(test)]
+mod testing;
 mod util;
-
-pub(crate) mod build_info {
-    include!(concat!(env!("OUT_DIR"), "/built.rs"));
-}
 
 pub type Request = axum::http::Request<axum::body::Body>;
 pub type Response = axum::http::Response<axum::body::Body>;
@@ -77,11 +56,11 @@ fn usage() -> ! {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 struct Args {
-    config_path: PathBuf,
+    config_path: std::path::PathBuf,
 }
 
 fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
-    let mut parsed = Arguments::from_env();
+    let mut parsed = pico_args::Arguments::from_env();
     if parsed.contains(["-h", "--help"]) {
         usage();
     }
@@ -96,18 +75,27 @@ fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
     Ok(args)
 }
 
-// the root datastructure for a Ronvoy instance
+/// Ronvoy is the root datastructure for a Ronvoy instance
 #[allow(dead_code)]
-struct GlobalRonvoy {}
+struct Ronvoy {
+    bootstrap: Arc<envoy_control_plane::envoy::config::bootstrap::v3::Bootstrap>,
+    node: Arc<envoy_control_plane::envoy::config::core::v3::Node>,
+    clusters: Arc<cluster::Clusters>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use envoy_control_plane::envoy::config::core::v3::{
+        node::UserAgentVersionType, BuildVersion, Node,
+    };
+    use envoy_control_plane::envoy::r#type::v3::SemanticVersion;
+
     let args = parse_args().unwrap_or_else(|err| {
         eprintln!("error: {}", err);
         usage();
     });
 
-    let bootstrap = bootstrap::load_config(&args.config_path).await?;
+    let bootstrap = config::bootstrap::load_config(&args.config_path).await?;
 
     let _num_threads = {
         std::env::var("CONCURRENCY")
@@ -119,7 +107,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bootstrap = Arc::new(bootstrap);
 
     let mut node = bootstrap.node.clone().unwrap_or_else(|| Node {
-        id: format!("ronvoy-{}", Uuid::new_v4()),
+        id: format!("ronvoy-{}", uuid::Uuid::new_v4()),
         ..Default::default()
     });
 
@@ -143,11 +131,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if let Some(static_resources) = bootstrap.static_resources.as_ref() {
         // build our upstream clusters
-        let clusters: HashMap<String, Arc<cluster::Cluster>> = static_resources
+        let clusters: std::collections::HashMap<String, Arc<cluster::Cluster>> = static_resources
             .clusters
             .iter()
             .filter_map(|cluster| {
-                Cluster::try_from(cluster.clone())
+                cluster::Cluster::try_from(cluster.clone())
                     .map(|cluster| (cluster.name.clone(), Arc::new(cluster)))
                     .ok()
             })
@@ -161,7 +149,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .listeners
             .iter()
             .cloned()
-            .filter_map(|cfg| MakeHttpConnectionRouter::try_from((cfg, clusters.clone())).ok())
+            .filter_map(|cfg| {
+                listener::MakeHttpConnectionRouter::try_from((cfg, clusters.clone())).ok()
+            })
         {
             let addr = listener.listen_addr;
             println!("reverse proxy listening on {}", addr);
@@ -171,12 +161,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // TODO: this would be a good place for our xDS poller/receiver to live.
     //       for now wait forever (we spawned the listeners we needed above)
-    future::pending::<()>().await;
+    std::future::pending::<()>().await;
     Ok(())
 }
 
 #[tokio::test]
 async fn end_to_end_ronvoy() {
+    use crate::testing::{TestHttpServer, TEST_HANDLER_RESPONSE};
+
     let upstream = TestHttpServer::new();
     let upstream_url = format!("http://{}/", upstream.addr);
 

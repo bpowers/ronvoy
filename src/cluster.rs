@@ -1,4 +1,4 @@
-// Copyright 2021 The Ronvoy Authors. All rights reserved.
+// Copyright 2022 The Ronvoy Authors. All rights reserved.
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
@@ -12,15 +12,15 @@ use std::sync::Arc;
 use std::task::Poll;
 
 use arc_swap::ArcSwapAny;
+use axum::http::Uri;
 use envoy_control_plane::envoy::config::cluster::v3::{
     cluster::LbPolicy as V3LbPolicy, Cluster as V3Cluster,
 };
 use envoy_control_plane::envoy::config::endpoint::v3::lb_endpoint::HostIdentifier;
 use envoy_control_plane::envoy::config::endpoint::v3::Endpoint;
 
-use crate::address::Address;
+use crate::address::{self, Address};
 use crate::util::response;
-use crate::{address, Uri};
 
 type Client = hyper::client::Client<hyper::client::HttpConnector>;
 
@@ -61,6 +61,7 @@ impl TryFrom<V3LbPolicy> for LbPolicy {
 /// Clusters is the updatable set of clusters a Ronvoy instance can route to
 pub type Clusters = ArcSwapAny<Arc<HashMap<String, Arc<Cluster>>>>;
 
+/// Cluster proxies requests to a specific set of upstream service instances
 #[allow(dead_code)]
 #[derive(Debug, Default, Clone)]
 pub struct Cluster {

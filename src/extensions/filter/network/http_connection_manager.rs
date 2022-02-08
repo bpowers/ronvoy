@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
-use std::error::Error as StdError;
-use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
 use envoy_control_plane::envoy::extensions::filters::network::http_connection_manager::v3::{
@@ -13,6 +11,14 @@ use envoy_control_plane::envoy::extensions::filters::network::http_connection_ma
 use crate::cluster::{Cluster, Clusters};
 use crate::route::{Action, ClusterSpecifier, RouteAction};
 use crate::Request;
+
+#[derive(thiserror::Error, Debug, Clone, PartialEq)]
+pub enum Error {
+    #[error("virtual host's domain is invalid: {0}")]
+    BadDomainGlob(String),
+    #[error("TODO: only static route_config is supported for now")]
+    UnsupportedRouteConfig,
+}
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct VirtualHost {
@@ -52,27 +58,6 @@ impl HttpConnectionManager {
         None
     }
 }
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Error {
-    BadDomainGlob(String),
-    UnsupportedRouteConfig,
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::BadDomainGlob(domain) => {
-                write!(f, "virtual host's domain invalid: '{}'", domain)
-            }
-            Error::UnsupportedRouteConfig => {
-                write!(f, "TODO: only static route_config is supported for now")
-            }
-        }
-    }
-}
-
-impl StdError for Error {}
 
 impl TryFrom<(V3HttpConnectionManager, Arc<Clusters>)> for HttpConnectionManager {
     type Error = Error;

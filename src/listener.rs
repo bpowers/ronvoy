@@ -1,4 +1,4 @@
-// Copyright 2021 The Ronvoy Authors. All rights reserved.
+// Copyright 2022 The Ronvoy Authors. All rights reserved.
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
@@ -17,9 +17,10 @@ use hyper::server::conn::AddrStream;
 use hyper::service::Service;
 
 use crate::cluster::Clusters;
+use crate::extensions::filter::network::http_connection_manager::HttpConnectionManager;
 use crate::util::response;
-use crate::{address, HttpConnectionManager};
 
+/// MakeHttpConnectionRouter is called when a new TCP connection is opened to us from a downstream client.
 #[derive(Clone, Debug)]
 pub struct MakeHttpConnectionRouter {
     pub listen_addr: SocketAddr,
@@ -59,9 +60,12 @@ impl<'t> Service<&'t AddrStream> for MakeHttpConnectionRouter {
     }
 }
 
+/// HttpConnectionRouter handles HTTP Requests that come in over a single connection
 #[derive(Clone, Debug)]
 pub struct HttpConnectionRouter {
+    #[allow(dead_code)]
     listen_addr: SocketAddr,
+    #[allow(dead_code)]
     remote_addr: SocketAddr,
     http_conn_mgr: Arc<HttpConnectionManager>,
 }
@@ -81,8 +85,8 @@ impl tower::Service<axum::http::Request<axum::body::Body>> for HttpConnectionRou
     fn call(&mut self, req: axum::http::Request<axum::body::Body>) -> Self::Future {
         let cluster = self.http_conn_mgr.get_cluster(&req);
         Box::pin(async move {
-            // get cluster name from self.http_conn_mgr
             if let Some(cluster) = cluster {
+                // the routing layer found a cluster we should send the request to
                 let mut c = (&*cluster).clone();
                 c.call(req).await
             } else {
@@ -92,7 +96,7 @@ impl tower::Service<axum::http::Request<axum::body::Body>> for HttpConnectionRou
                 ))
             }
 
-            // log line
+            // TODO: log line
         })
     }
 }
@@ -135,7 +139,7 @@ impl TryFrom<(V3Listener, Arc<Clusters>)> for MakeHttpConnectionRouter {
         // TODO: transport socket
 
         if let Some(addr) = listener.address.clone() {
-            let address::Address::Socket(addr) = address::Address::try_from(addr)?;
+            let crate::address::Address::Socket(addr) = crate::address::Address::try_from(addr)?;
             Ok(MakeHttpConnectionRouter::new(http_conn_mgr, addr))
         } else {
             Err(anyhow!("expected listener to specify address"))

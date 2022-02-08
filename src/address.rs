@@ -1,47 +1,26 @@
-// Copyright 2021 The Ronvoy Authors. All rights reserved.
+// Copyright 2022 The Ronvoy Authors. All rights reserved.
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
 use std::net::{AddrParseError, SocketAddr};
 
 use envoy_control_plane::envoy::config::core::v3::{
-    address::Address as V3InnerAddress, Address as V3Address,
+    address::Address as V3InnerAddress, socket_address::PortSpecifier, Address as V3Address,
 };
 
-use envoy_control_plane::envoy::config::core::v3::socket_address::PortSpecifier;
-use std::error::Error as StdError;
-use std::fmt::{Display, Formatter};
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(thiserror::Error, Debug, Clone, PartialEq)]
 pub enum Error {
+    #[error("unsupported address {0}")]
     UnsupportedAddress(String),
+    #[error("missing value (possibly bad protobuf/serialization)")]
     MissingValue, // protobuf missing value
+    #[error("missing port (possibly bad protobuf/serialization)")]
     MissingPort,
+    #[error("port {0} too big (max 2^16)")]
     PortTooBig(u32),
+    #[error("parse error: {0}")]
     Parse(AddrParseError),
 }
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::UnsupportedAddress(msg) => write!(f, "unsupported address type: \"{}\"", msg),
-            Error::MissingValue => write!(
-                f,
-                "missing value (likely mistake in creating/serializing protobuf"
-            ),
-            Error::MissingPort => write!(
-                f,
-                "missing port (likely mistake in creating/serializing protobuf"
-            ), //
-            Error::PortTooBig(port) => {
-                write!(f, "port value {} bigger than max port of 2^16", port)
-            }
-            Error::Parse(addr_err) => write!(f, "error parsing socket addr: {}", addr_err),
-        }
-    }
-}
-
-impl StdError for Error {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Address {
