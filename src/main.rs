@@ -162,6 +162,14 @@ pub async fn start_ronvoy(args: Args) -> Result<(), Box<dyn std::error::Error>> 
 
 fn main() {
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 9110));
+    // socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, IPPROTO_IP) = 3
+    let socket = socket2::Socket::new(socket2::Domain::ipv4(), socket2::Type::stream(), Some(socket2::Protocol::TCP)).unwrap();
+    socket.set_reuse_address(true).unwrap();
+    socket.set_reuse_port(true).unwrap();
+    socket.bind(addr.into()).unwrap();
+    socket.listen(128);
+    let listener = socket.into_tcp_listener();
+
     let sk = socket2::Socket::new().unwrap();
 
     tokio::runtime::Builder::new_multi_thread()
