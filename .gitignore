@@ -4,3 +4,5 @@ target
 /go/cmd/test-xds-srv/test-xds-srv
 /test/certs/*.old
 /test/certs/*.pem
+perf.data
+perf.data.old
