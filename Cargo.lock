@@ -1212,6 +1212,7 @@ dependencies = [
  "reqwest",
  "serde_json",
  "serde_yaml",
+ "socket2",
  "thiserror",
  "tokio",
  "tonic",

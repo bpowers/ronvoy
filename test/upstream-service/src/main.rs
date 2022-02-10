@@ -6,8 +6,7 @@ use std::net::{SocketAddr, TcpListener};
 
 use axum::{routing::get, Router};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let num_threads = {
         std::env::var("CONCURRENCY")
             .ok()

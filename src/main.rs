@@ -160,7 +160,10 @@ pub async fn start_ronvoy(args: Args) -> Result<(), Box<dyn std::error::Error>> 
     Ok(())
 }
 
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
+    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 9110));
+    let sk = socket2::Socket::new().unwrap();
+
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
