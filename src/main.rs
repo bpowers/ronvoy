@@ -50,8 +50,8 @@ fn usage() -> ! {
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-struct Args {
-    config_path: std::path::PathBuf,
+pub struct Args {
+    pub config_path: std::path::PathBuf,
 }
 
 fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
@@ -78,30 +78,15 @@ struct Ronvoy {
     clusters: Arc<cluster::Clusters>,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn get_node(
+    bootstrap_node: &Option<envoy_control_plane::envoy::config::core::v3::Node>,
+) -> envoy_control_plane::envoy::config::core::v3::Node {
     use envoy_control_plane::envoy::config::core::v3::{
         node::UserAgentVersionType, BuildVersion, Node,
     };
     use envoy_control_plane::envoy::r#type::v3::SemanticVersion;
 
-    let args = parse_args().unwrap_or_else(|err| {
-        eprintln!("error: {}", err);
-        usage();
-    });
-
-    let bootstrap = config::bootstrap::load_config(&args.config_path).await?;
-
-    let _num_threads = {
-        std::env::var("CONCURRENCY")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(4)
-    };
-
-    let bootstrap = Arc::new(bootstrap);
-
-    let mut node = bootstrap.node.clone().unwrap_or_else(|| Node {
+    let mut node = bootstrap_node.clone().unwrap_or_else(|| Node {
         id: format!("ronvoy-{}", uuid::Uuid::new_v4()),
         ..Default::default()
     });
@@ -118,8 +103,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             metadata: None,
         }));
 
+    node
+}
+
+pub async fn start_ronvoy(args: Args) -> Result<(), Box<dyn std::error::Error>> {
+    let bootstrap = config::bootstrap::load_config(&args.config_path).await?;
+
+    let _num_threads = {
+        std::env::var("CONCURRENCY")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(4)
+    };
+
+    let bootstrap = Arc::new(bootstrap);
+
     #[allow(unused_variables)]
-    let node = Arc::new(node);
+    let node = Arc::new(get_node(&bootstrap.node));
 
     // let _cert = tokio::fs::read(&args.cert).await?;
     // let _key = tokio::fs::read(&args.key).await?;
@@ -158,6 +158,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //       for now wait forever (we spawned the listeners we needed above)
     std::future::pending::<()>().await;
     Ok(())
+}
+
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async {
+            let args = parse_args().unwrap_or_else(|err| {
+                eprintln!("error: {}", err);
+                usage();
+            });
+
+            start_ronvoy(args).await?;
+            Ok(())
+        })
 }
 
 #[tokio::test]
