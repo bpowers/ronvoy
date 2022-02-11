@@ -9,6 +9,7 @@ use socket2::SockAddr;
 
 pub struct TcpListenerCloner {
     pub addr: SocketAddr,
+    #[allow(dead_code)]
     listener: Option<TcpListener>,
 }
 
@@ -42,7 +43,7 @@ impl TcpListenerCloner {
     pub fn clone_listener(&mut self) -> Result<TcpListener, Box<dyn Error>> {
         // SO_REUSEPORT works great on linux, so create a new socket for each
         // clone_listener request.
-        new_tcp_listener(addr, true)
+        new_tcp_listener(self.addr, true)
     }
 }
 
