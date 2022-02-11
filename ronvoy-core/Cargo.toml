@@ -1,0 +1,15 @@
+[package]
+name = "ronvoy-core"
+version = "0.1.0"
+authors = ["Bobby Powers <bobbypowers@gmail.com>"]
+license = "Apache-2.0"
+edition = "2021"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+axum = "0.4"
+cfg-if = "1"
+socket2 = { version = "0.4", features = ["all"] }
+tokio = { version = "1", default-features = false, features = ["fs", "io-util"] }

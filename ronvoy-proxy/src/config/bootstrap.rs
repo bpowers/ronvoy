@@ -6,8 +6,7 @@ use std::error::Error as StdError;
 use std::path::Path;
 
 use envoy_control_plane::envoy::config::bootstrap::v3::Bootstrap as V3Bootstrap;
-
-use crate::util::file;
+use ronvoy_core::file;
 
 pub async fn load_config(path: &Path) -> Result<V3Bootstrap, Box<dyn StdError>> {
     let config_contents = file::read_all_utf8(path).await?;

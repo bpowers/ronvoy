@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "ronvoy-core",
     "ronvoy-proxy",
     "ronvoy-server",
     "test/upstream-service",

@@ -2,5 +2,9 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
-pub(crate) mod file;
-pub(crate) mod response;
+pub mod file;
+pub mod net;
+pub mod response;
+
+pub type Request = axum::http::Request<axum::body::Body>;
+pub type Response = axum::http::Response<axum::body::Body>;

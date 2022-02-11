@@ -18,10 +18,9 @@ mod listener;
 mod route;
 #[cfg(test)]
 mod testing;
-mod util;
 
-pub type Request = axum::http::Request<axum::body::Body>;
-pub type Response = axum::http::Response<axum::body::Body>;
+pub type Request = ronvoy_core::Request;
+pub type Response = ronvoy_core::Response;
 
 /// Ronvoy is the root datastructure for a Ronvoy instance
 /// TODO: should we not have Arcs here, and instead Arc the Ronvoy instance?

@@ -5,7 +5,7 @@
 use axum::http::StatusCode;
 
 /// json_error returns a `Response` with a JSON body describing the error and the Content-Type header set.
-pub(crate) fn json_error<T>(status: T, msg: &str) -> crate::Response
+pub fn json_error<T>(status: T, msg: &str) -> crate::Response
 where
     StatusCode: TryFrom<T>,
     <StatusCode as TryFrom<T>>::Error: Into<axum::http::Error>,

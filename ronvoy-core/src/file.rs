@@ -11,7 +11,7 @@ use tokio::io::AsyncReadExt;
 const INITIAL_BUFFER_CAPACITY: usize = 32 * 1024;
 
 /// read_all_utf8 reads a file from disk and returns it as a UTF8-valid string
-pub(crate) async fn read_all_utf8(path: impl AsRef<Path>) -> Result<String, Box<dyn StdError>> {
+pub async fn read_all_utf8(path: impl AsRef<Path>) -> Result<String, Box<dyn StdError>> {
     let mut file = File::open(path).await?;
     let mut buf = Vec::with_capacity(INITIAL_BUFFER_CAPACITY);
     file.read_to_end(&mut buf).await?;

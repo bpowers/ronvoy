@@ -1196,6 +1196,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ronvoy-core"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "cfg-if",
+ "socket2",
+ "tokio",
+]
+
+[[package]]
 name = "ronvoy-proxy"
 version = "0.1.0"
 dependencies = [
@@ -1210,6 +1220,7 @@ dependencies = [
  "hyper-rustls",
  "pico-args",
  "reqwest",
+ "ronvoy-core",
  "serde_json",
  "serde_yaml",
  "socket2",

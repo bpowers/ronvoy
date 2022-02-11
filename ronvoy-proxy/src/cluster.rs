@@ -18,9 +18,9 @@ use envoy_control_plane::envoy::config::cluster::v3::{
 };
 use envoy_control_plane::envoy::config::endpoint::v3::lb_endpoint::HostIdentifier;
 use envoy_control_plane::envoy::config::endpoint::v3::Endpoint;
+use ronvoy_core::response;
 
 use crate::address::{self, Address};
-use crate::util::response;
 
 type Client = hyper::client::Client<hyper::client::HttpConnector>;
 
