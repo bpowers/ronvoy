@@ -71,7 +71,7 @@ fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 9110));
     println!("using {:?} event loop", event_loop_kind);
 
-    let mut listener = TcpListenerCloner::new(addr);
+    let listener = TcpListenerCloner::new(addr);
 
     event_loop::Builder::new(event_loop_kind)
         .worker_threads(thread_count)

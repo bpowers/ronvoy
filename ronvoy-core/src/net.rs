@@ -4,26 +4,28 @@
 
 use std::error::Error;
 use std::net::{SocketAddr, TcpListener};
+use std::sync::Mutex;
 
 use socket2::SockAddr;
 
 pub struct TcpListenerCloner {
     pub addr: SocketAddr,
     #[allow(dead_code)]
-    listener: Option<TcpListener>,
+    listener: Mutex<Option<TcpListener>>,
 }
 
 impl TcpListenerCloner {
     pub fn new(addr: SocketAddr) -> TcpListenerCloner {
         TcpListenerCloner {
             addr,
-            listener: None,
+            listener: Mutex::new(None),
         }
     }
 
     #[cfg(target_os = "macos")]
-    pub fn clone_listener(&mut self) -> Result<TcpListener, Box<dyn Error>> {
-        if self.listener.is_none() {
+    pub fn clone_listener(&self) -> Result<TcpListener, Box<dyn Error>> {
+        let mut listener = self.listener.lock().unwrap();
+        if listener.as_ref().is_none() {
             // SO_REUSEPORT on macOS is implemented such that _only_ the
             // last/most_recently created listener receives new connections.
             // This is different from the sane behavior of Linux (new requests are
@@ -32,15 +34,15 @@ impl TcpListenerCloner {
             // whenever clone_listener is called.  This will cause all dup'd sockets
             // to wake up and race to `accept(2)` a new connection, but its better
             // than the SO_REUSEPORT behavior.
-            self.listener = Some(new_tcp_listener(self.addr, false)?);
+            *listener = Some(new_tcp_listener(self.addr, false)?);
         }
 
-        let cloned = self.listener.as_ref().unwrap().try_clone()?;
+        let cloned = listener.as_ref().unwrap().try_clone()?;
         Ok(cloned)
     }
 
     #[cfg(not(target_os = "macos"))]
-    pub fn clone_listener(&mut self) -> Result<TcpListener, Box<dyn Error>> {
+    pub fn clone_listener(&self) -> Result<TcpListener, Box<dyn Error>> {
         // SO_REUSEPORT works great on linux, so create a new socket for each
         // clone_listener request.
         new_tcp_listener(self.addr, true)

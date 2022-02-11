@@ -4,8 +4,10 @@
 
 use std::sync::Arc;
 
+use crate::listener::MakeHttpConnectionRouter;
 use envoy_control_plane::envoy::config::bootstrap::v3::Bootstrap;
 use envoy_control_plane::envoy::config::core::v3::Node;
+use ronvoy_core::net::TcpListenerCloner;
 
 mod address;
 pub mod build_info {
@@ -28,47 +30,55 @@ pub struct Ronvoy {
     pub bootstrap_config: Arc<Bootstrap>,
     pub node: Arc<Node>,
     pub clusters: Arc<cluster::Clusters>,
+    pub listeners: Vec<(TcpListenerCloner, MakeHttpConnectionRouter)>,
 }
 
 impl Ronvoy {
     /// new creates a new Ronvoy instance from a given bootstrap config.
     pub fn new(bootstrap_config: Bootstrap) -> Result<Ronvoy, Box<dyn std::error::Error>> {
-        let clusters = get_bootstrap_clusters(&bootstrap_config)?;
+        let clusters = Arc::new(get_bootstrap_clusters(&bootstrap_config)?);
         let node = get_node(bootstrap_config.node.as_ref());
+        let bootstrap_config = Arc::new(bootstrap_config);
+
+        let listeners: Vec<_> =
+            if let Some(static_resources) = bootstrap_config.static_resources.as_ref() {
+                static_resources
+                    .listeners
+                    .iter()
+                    .cloned()
+                    .filter_map(|cfg| {
+                        listener::MakeHttpConnectionRouter::try_from((cfg, clusters.clone())).ok()
+                    })
+                    .map(|listener| (TcpListenerCloner::new(listener.listen_addr), listener))
+                    .collect()
+            } else {
+                vec![]
+            };
 
         Ok(Ronvoy {
-            bootstrap_config: Arc::new(bootstrap_config),
+            bootstrap_config,
             node: Arc::new(node),
-            clusters: Arc::new(clusters),
+            clusters,
+            listeners,
         })
     }
 
     /// start creates listeners and gets Ronvoy to begin accepting requests.
     pub async fn start(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let bootstrap = self.bootstrap_config.clone();
-
-        let listeners: Vec<_> = if let Some(static_resources) = bootstrap.static_resources.as_ref()
-        {
-            static_resources
-                .listeners
-                .iter()
-                .cloned()
-                .filter_map(|cfg| {
-                    listener::MakeHttpConnectionRouter::try_from((cfg, self.clusters.clone())).ok()
-                })
-                .collect()
-        } else {
-            vec![]
-        };
-
         // TODO: xDS connection and updates
 
-        let results = futures::future::join_all(listeners.into_iter().map(|listener| {
-            let addr = listener.listen_addr;
-            println!("ronvoy listening on {}", addr);
-            tokio::spawn(axum::Server::bind(&addr).serve(listener))
-        }))
-        .await;
+        let results =
+            futures::future::join_all(self.listeners.iter().filter_map(|(listener, router)| {
+                let addr = router.listen_addr;
+                println!("ronvoy listening on {}", addr);
+                if let Ok(listener) = listener.clone_listener() {
+                    if let Ok(server) = axum::Server::from_tcp(listener) {
+                        return Some(tokio::spawn(server.serve(router.clone())));
+                    }
+                }
+                None
+            }))
+            .await;
 
         for result in results {
             // exit early with the first Err found
