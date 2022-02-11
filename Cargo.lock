@@ -1228,6 +1228,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "cfg-if",
+ "num_cpus",
  "socket2",
  "tokio",
 ]
@@ -1814,6 +1815,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "jemallocator",
+ "pico-args",
  "ronvoy-core",
  "serde_json",
  "tokio",

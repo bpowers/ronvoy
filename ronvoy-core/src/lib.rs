@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
+pub mod event_loop;
 pub mod file;
 pub mod net;
 pub mod response;
