@@ -69,10 +69,7 @@ fn main() {
     };
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 9110));
-    println!(
-        "listening on {} with a {:?} event loop",
-        addr, event_loop_kind
-    );
+    println!("using {:?} event loop", event_loop_kind);
 
     let mut listener = TcpListenerCloner::new(addr);
 
@@ -80,6 +77,7 @@ fn main() {
         .worker_threads(thread_count)
         .build_and_block_on(|| {
             let listener = listener.clone_listener().unwrap();
+            eprintln!("listening on {}", listener.local_addr().unwrap());
             async {
                 // build our application with a route
                 let app = Router::new().route("/", get(handler));
