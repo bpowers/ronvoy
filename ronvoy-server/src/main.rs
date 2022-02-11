@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
+use ronvoy_proxy::{config::bootstrap, Ronvoy};
+
 #[macro_export]
 macro_rules! die(
     ($($arg:tt)*) => { {
@@ -27,7 +29,7 @@ fn usage() -> ! {
             "    -h, --help          show this message\n",
             "    --config-path PATH  path to envoy bootstrap config JSON\n",
         ),
-        ronvoy_core::build_info::PKG_VERSION,
+        ronvoy_proxy::build_info::PKG_VERSION,
         argv0
     );
 }
@@ -73,9 +75,9 @@ fn main() {
     rt.build()
         .unwrap()
         .block_on(async {
-            let bootstrap = ronvoy_core::config::bootstrap::load_config(&args.config_path).await?;
+            let bootstrap = bootstrap::load_config(&args.config_path).await?;
 
-            let ronvoy = ronvoy_core::Ronvoy::new(bootstrap)?;
+            let ronvoy = Ronvoy::new(bootstrap)?;
             ronvoy.start().await
         })
         .unwrap();

@@ -8,6 +8,6 @@ license = "Apache-2.0"
 [dependencies]
 axum = "0.4"
 pico-args = "0.4"
-ronvoy-core = { version = "0.1", path = "../ronvoy-core" }
+ronvoy-proxy = { version = "0.1", path = "../ronvoy-proxy" }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
