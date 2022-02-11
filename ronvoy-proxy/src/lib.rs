@@ -61,14 +61,19 @@ impl Ronvoy {
             vec![]
         };
 
-        for listener in listeners.into_iter() {
+        // TODO: xDS connection and updates
+
+        let results = futures::future::join_all(listeners.into_iter().map(|listener| {
             let addr = listener.listen_addr;
             println!("ronvoy listening on {}", addr);
-            let _ = tokio::spawn(axum::Server::bind(&addr).serve(listener));
-        }
+            tokio::spawn(axum::Server::bind(&addr).serve(listener))
+        }))
+        .await;
 
-        // TODO: xDS connection and updates
-        std::future::pending::<()>().await;
+        for result in results {
+            // exit early with the first Err found
+            result??;
+        }
 
         Ok(())
     }

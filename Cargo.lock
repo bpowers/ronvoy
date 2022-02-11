@@ -1264,7 +1264,9 @@ name = "ronvoy-server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "futures",
  "pico-args",
+ "ronvoy-core",
  "ronvoy-proxy",
  "serde_json",
  "tokio",

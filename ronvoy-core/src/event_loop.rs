@@ -5,7 +5,7 @@
 use std::error::Error;
 use std::future::Future;
 
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum EventLoop {
     ThreadPool,
     MultiSingleThreaded,

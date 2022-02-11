@@ -21,3 +21,17 @@ pub async fn load_config(path: &Path) -> Result<V3Bootstrap, Box<dyn StdError>> 
     };
     Ok(bootstrap)
 }
+
+pub fn load_config_sync(path: &Path) -> Result<V3Bootstrap, Box<dyn StdError>> {
+    let config_contents = file::read_all_utf8_sync(path)?;
+    let config_ext = path.extension().unwrap_or_default();
+    let bootstrap = if config_ext == "yaml" || config_ext == "yml" {
+        eprintln!(
+            "WARNING: YAML support is currently flakey (e.g. durations don't work) - use JSON"
+        );
+        serde_yaml::from_str(&config_contents)?
+    } else {
+        serde_json::from_str(&config_contents)?
+    };
+    Ok(bootstrap)
+}

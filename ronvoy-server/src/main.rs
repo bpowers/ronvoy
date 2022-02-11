@@ -2,6 +2,9 @@
 // Use of this source code is governed by the Apache License,
 // Version 2.0, that can be found in the LICENSE file.
 
+use std::sync::Arc;
+
+use ronvoy_core::event_loop::{self, EventLoop};
 use ronvoy_proxy::{config::bootstrap, Ronvoy};
 
 #[macro_export]
@@ -28,6 +31,8 @@ fn usage() -> ! {
          OPTIONS:\n",
             "    -h, --help          show this message\n",
             "    --config-path PATH  path to envoy bootstrap config JSON\n",
+            "    --thread-pool       use thread-pool-based event loop (DEFAULT)\n",
+            "    --independent       use multiple single-threaded event loops like Envoy\n",
         ),
         ronvoy_proxy::build_info::PKG_VERSION,
         argv0
@@ -37,6 +42,7 @@ fn usage() -> ! {
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Args {
     pub config_path: std::path::PathBuf,
+    pub event_loop_kind: EventLoop,
 }
 
 fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
@@ -47,9 +53,20 @@ fn parse_args() -> Result<Args, Box<dyn std::error::Error>> {
 
     let mut args = Args {
         config_path: "bootstrap.yaml".to_owned().into(),
+        event_loop_kind: EventLoop::ThreadPool,
     };
     if let Ok(config_path) = parsed.value_from_str("--config-path") {
         args.config_path = config_path;
+    }
+
+    if parsed.contains("--independent") {
+        if parsed.contains("--thread-pool") {
+            eprintln!("ERROR: --thread-pool and --independent are mutually exclusive arguments");
+            usage();
+        }
+        args.event_loop_kind = EventLoop::MultiSingleThreaded;
+    } else if parsed.contains("--thread-pool") {
+        args.event_loop_kind = EventLoop::ThreadPool;
     }
 
     Ok(args)
@@ -64,21 +81,15 @@ fn main() {
             .and_then(|s| s.parse().ok())
     };
 
-    let mut rt = tokio::runtime::Builder::new_multi_thread();
-    rt.enable_all();
+    let bootstrap = bootstrap::load_config_sync(&args.config_path).unwrap();
+    let ronvoy = Arc::new(Ronvoy::new(bootstrap).unwrap());
 
-    // if we've explicitly been told how many threads to use, only use that many
-    if let Some(num_threads) = num_threads {
-        rt.worker_threads(num_threads);
-    }
-
-    rt.build()
-        .unwrap()
-        .block_on(async {
-            let bootstrap = bootstrap::load_config(&args.config_path).await?;
-
-            let ronvoy = Ronvoy::new(bootstrap)?;
-            ronvoy.start().await
+    println!("using {:?} event loop", args.event_loop_kind);
+    event_loop::Builder::new(args.event_loop_kind)
+        .worker_threads(num_threads)
+        .build_and_block_on(|| {
+            let ronvoy = ronvoy.clone();
+            async move { ronvoy.start().await }
         })
         .unwrap();
 }
