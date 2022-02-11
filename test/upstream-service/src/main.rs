@@ -20,7 +20,12 @@ fn main() {
 
     let mut children = vec![];
     for _i in 0..num_threads {
-        let socket = socket2::Socket::new(socket2::Domain::IPV4, socket2::Type::STREAM, Some(socket2::Protocol::TCP)).unwrap();
+        let socket = socket2::Socket::new(
+            socket2::Domain::IPV4,
+            socket2::Type::STREAM,
+            Some(socket2::Protocol::TCP),
+        )
+        .unwrap();
         socket.set_reuse_address(true).unwrap();
         socket.set_reuse_port(true).unwrap();
         socket.bind(&SockAddr::from(addr)).unwrap();

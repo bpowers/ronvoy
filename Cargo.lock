@@ -745,9 +745,9 @@ dependencies = [
 
 [[package]]
 name = "ntapi"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f6bb902e437b6d86e03cce10a7e2af662292c5dfef23b65899ea3ac9354ad44"
+checksum = "c28774a7fd2fbb4f0babd8237ce554b73af68021b5f695a3cebd6c59bac0980f"
 dependencies = [
  "winapi",
 ]
@@ -1196,7 +1196,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ronvoy"
+name = "ronvoy-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1218,6 +1218,17 @@ dependencies = [
  "tonic",
  "tower",
  "uuid",
+]
+
+[[package]]
+name = "ronvoy-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "pico-args",
+ "ronvoy-core",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -1758,6 +1769,16 @@ name = "untrusted"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
+
+[[package]]
+name = "upstream-service"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "serde_json",
+ "socket2",
+ "tokio",
+]
 
 [[package]]
 name = "url"
