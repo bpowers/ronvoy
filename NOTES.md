@@ -22,3 +22,19 @@ I think I'd learn a lot setting up a benchmark harness to test the following:
 A big thing here will be ensuring the load generating tool doesn't interfere with the HTTP servers -- probably need to do something like partition $NCPUs into 2, give half to the benchmark harness and the rest to the server.  
 Or carve out 2 CPUs for harness, assume thats good enough and give the rest to the server.
 
+
+multi-process
+=============
+
+to look at:
+* `ngx_add_inherited_sockets`
+* `ngx_signal_process` (different from `ngx_init_signals`)
+* do we need a pidfile?
+* nginx allocates a 300-byte-long environment variable as 'scratch space' for setproctitle
+* who initiates child process cycling?  the child after, say, $n requests, or the coordinator?
+* what about stats (and logs)?  I assume logs are easiest: children can just write to stderr or some such
+
+security
+========
+
+how much can we lock down child processes?
